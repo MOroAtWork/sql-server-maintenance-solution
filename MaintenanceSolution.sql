@@ -59,9 +59,9 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[CommandLog]') AND type in (N'U'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[^CUSTOMSCHEMANAME^].[CommandLog]') AND type in (N'U'))
 BEGIN
-CREATE TABLE ^CUSTOMSCHEMANAME^.[CommandLog](
+CREATE TABLE [^CUSTOMSCHEMANAME^].[CommandLog](
   [ID] [int] IDENTITY(1,1) NOT NULL,
   [DatabaseName] [sysname] NULL,
   [SchemaName] [sysname] NULL,
@@ -89,12 +89,12 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[CommandExecute]') AND type in (N'P', N'PC'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[^CUSTOMSCHEMANAME^].[CommandExecute]') AND type in (N'P', N'PC'))
 BEGIN
-EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE ^CUSTOMSCHEMANAME^.[CommandExecute] AS'
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [^CUSTOMSCHEMANAME^].[CommandExecute] AS'
 END
 GO
-ALTER PROCEDURE ^CUSTOMSCHEMANAME^.[CommandExecute]
+ALTER PROCEDURE [^CUSTOMSCHEMANAME^].[CommandExecute]
 
 @DatabaseContext nvarchar(max),
 @Command nvarchar(max),
@@ -381,12 +381,12 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[DatabaseBackup]') AND type in (N'P', N'PC'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[^CUSTOMSCHEMANAME^].[DatabaseBackup]') AND type in (N'P', N'PC'))
 BEGIN
-EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE ^CUSTOMSCHEMANAME^.[DatabaseBackup] AS'
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [^CUSTOMSCHEMANAME^].[DatabaseBackup] AS'
 END
 GO
-ALTER PROCEDURE ^CUSTOMSCHEMANAME^.[DatabaseBackup]
+ALTER PROCEDURE [^CUSTOMSCHEMANAME^].[DatabaseBackup]
 
 @Databases nvarchar(max) = NULL,
 @Directory nvarchar(max) = NULL,
@@ -2792,7 +2792,7 @@ BEGIN
     BEGIN TRY
 
       SELECT @QueueID = QueueID
-      FROM ^CUSTOMSCHEMANAME^.[Queue]
+      FROM [^CUSTOMSCHEMANAME^].[Queue]
       WHERE SchemaName = @SchemaName
       AND ObjectName = @ObjectName
       AND [Parameters] = @Parameters
@@ -2802,14 +2802,14 @@ BEGIN
         BEGIN TRANSACTION
 
         SELECT @QueueID = QueueID
-        FROM ^CUSTOMSCHEMANAME^.[Queue] WITH (UPDLOCK, HOLDLOCK)
+        FROM [^CUSTOMSCHEMANAME^].[Queue] WITH (UPDLOCK, HOLDLOCK)
         WHERE SchemaName = @SchemaName
         AND ObjectName = @ObjectName
         AND [Parameters] = @Parameters
 
         IF @QueueID IS NULL
         BEGIN
-          INSERT INTO ^CUSTOMSCHEMANAME^.[Queue] (SchemaName, ObjectName, [Parameters])
+          INSERT INTO [^CUSTOMSCHEMANAME^].[Queue] (SchemaName, ObjectName, [Parameters])
           SELECT @SchemaName, @ObjectName, @Parameters
 
           SET @QueueID = SCOPE_IDENTITY()
@@ -2825,7 +2825,7 @@ BEGIN
           SessionID = @@SPID,
           RequestID = (SELECT request_id FROM sys.dm_exec_requests WHERE session_id = @@SPID),
           RequestStartTime = (SELECT start_time FROM sys.dm_exec_requests WHERE session_id = @@SPID)
-      FROM ^CUSTOMSCHEMANAME^.[Queue] [Queue]
+      FROM [^CUSTOMSCHEMANAME^].[Queue] [Queue]
       WHERE QueueID = @QueueID
       AND NOT EXISTS (SELECT *
                       FROM sys.dm_exec_requests
@@ -2861,7 +2861,7 @@ BEGIN
       COMMIT TRANSACTION
 
       SELECT @QueueStartTime = QueueStartTime
-      FROM ^CUSTOMSCHEMANAME^.[Queue]
+      FROM [^CUSTOMSCHEMANAME^].[Queue]
       WHERE QueueID = @QueueID
 
     END TRY
@@ -4465,12 +4465,12 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck]') AND type in (N'P', N'PC'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[^CUSTOMSCHEMANAME^].[DatabaseIntegrityCheck]') AND type in (N'P', N'PC'))
 BEGIN
-EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE ^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck] AS'
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [^CUSTOMSCHEMANAME^].[DatabaseIntegrityCheck] AS'
 END
 GO
-ALTER PROCEDURE ^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck]
+ALTER PROCEDURE [^CUSTOMSCHEMANAME^].[DatabaseIntegrityCheck]
 
 @Databases nvarchar(max) = NULL,
 @CheckCommands nvarchar(max) = 'CHECKDB',
@@ -5642,7 +5642,7 @@ BEGIN
     BEGIN TRY
 
       SELECT @QueueID = QueueID
-      FROM ^CUSTOMSCHEMANAME^.[Queue]
+      FROM [^CUSTOMSCHEMANAME^].[Queue]
       WHERE SchemaName = @SchemaName
       AND ObjectName = @ObjectName
       AND [Parameters] = @Parameters
@@ -5652,14 +5652,14 @@ BEGIN
         BEGIN TRANSACTION
 
         SELECT @QueueID = QueueID
-        FROM ^CUSTOMSCHEMANAME^.[Queue] WITH (UPDLOCK, HOLDLOCK)
+        FROM [^CUSTOMSCHEMANAME^].[Queue] WITH (UPDLOCK, HOLDLOCK)
         WHERE SchemaName = @SchemaName
         AND ObjectName = @ObjectName
         AND [Parameters] = @Parameters
 
         IF @QueueID IS NULL
         BEGIN
-          INSERT INTO ^CUSTOMSCHEMANAME^.[Queue] (SchemaName, ObjectName, [Parameters])
+          INSERT INTO [^CUSTOMSCHEMANAME^].[Queue] (SchemaName, ObjectName, [Parameters])
           SELECT @SchemaName, @ObjectName, @Parameters
 
           SET @QueueID = SCOPE_IDENTITY()
@@ -5675,7 +5675,7 @@ BEGIN
           SessionID = @@SPID,
           RequestID = (SELECT request_id FROM sys.dm_exec_requests WHERE session_id = @@SPID),
           RequestStartTime = (SELECT start_time FROM sys.dm_exec_requests WHERE session_id = @@SPID)
-      FROM ^CUSTOMSCHEMANAME^.[Queue] [Queue]
+      FROM [^CUSTOMSCHEMANAME^].[Queue] [Queue]
       WHERE QueueID = @QueueID
       AND NOT EXISTS (SELECT *
                       FROM sys.dm_exec_requests
@@ -5711,7 +5711,7 @@ BEGIN
       COMMIT TRANSACTION
 
       SELECT @QueueStartTime = QueueStartTime
-      FROM ^CUSTOMSCHEMANAME^.[Queue]
+      FROM [^CUSTOMSCHEMANAME^].[Queue]
       WHERE QueueID = @QueueID
 
     END TRY
@@ -6353,12 +6353,12 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[IndexOptimize]') AND type in (N'P', N'PC'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[^CUSTOMSCHEMANAME^].[IndexOptimize]') AND type in (N'P', N'PC'))
 BEGIN
-EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE ^CUSTOMSCHEMANAME^.[IndexOptimize] AS'
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [^CUSTOMSCHEMANAME^].[IndexOptimize] AS'
 END
 GO
-ALTER PROCEDURE ^CUSTOMSCHEMANAME^.[IndexOptimize]
+ALTER PROCEDURE [^CUSTOMSCHEMANAME^].[IndexOptimize]
 
 @Databases nvarchar(max) = NULL,
 @FragmentationLow nvarchar(max) = NULL,
@@ -7636,7 +7636,7 @@ BEGIN
     BEGIN TRY
 
       SELECT @QueueID = QueueID
-      FROM ^CUSTOMSCHEMANAME^.[Queue]
+      FROM [^CUSTOMSCHEMANAME^].[Queue]
       WHERE SchemaName = @SchemaName
       AND ObjectName = @ObjectName
       AND [Parameters] = @Parameters
@@ -7646,14 +7646,14 @@ BEGIN
         BEGIN TRANSACTION
 
         SELECT @QueueID = QueueID
-        FROM ^CUSTOMSCHEMANAME^.[Queue] WITH (UPDLOCK, HOLDLOCK)
+        FROM [^CUSTOMSCHEMANAME^].[Queue] WITH (UPDLOCK, HOLDLOCK)
         WHERE SchemaName = @SchemaName
         AND ObjectName = @ObjectName
         AND [Parameters] = @Parameters
 
         IF @QueueID IS NULL
         BEGIN
-          INSERT INTO ^CUSTOMSCHEMANAME^.[Queue] (SchemaName, ObjectName, [Parameters])
+          INSERT INTO [^CUSTOMSCHEMANAME^].[Queue] (SchemaName, ObjectName, [Parameters])
           SELECT @SchemaName, @ObjectName, @Parameters
 
           SET @QueueID = SCOPE_IDENTITY()
@@ -7669,7 +7669,7 @@ BEGIN
           SessionID = @@SPID,
           RequestID = (SELECT request_id FROM sys.dm_exec_requests WHERE session_id = @@SPID),
           RequestStartTime = (SELECT start_time FROM sys.dm_exec_requests WHERE session_id = @@SPID)
-      FROM ^CUSTOMSCHEMANAME^.[Queue] [Queue]
+      FROM [^CUSTOMSCHEMANAME^].[Queue] [Queue]
       WHERE QueueID = @QueueID
       AND NOT EXISTS (SELECT *
                       FROM sys.dm_exec_requests
@@ -7705,7 +7705,7 @@ BEGIN
       COMMIT TRANSACTION
 
       SELECT @QueueStartTime = QueueStartTime
-      FROM ^CUSTOMSCHEMANAME^.[Queue]
+      FROM [^CUSTOMSCHEMANAME^].[Queue]
       WHERE QueueID = @QueueID
 
     END TRY
@@ -8922,47 +8922,47 @@ BEGIN
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01, OutputFileNamePart02)
   SELECT 'DatabaseBackup - SYSTEM_DATABASES - FULL',
-         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''SYSTEM_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''FULL'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE [^CUSTOMSCHEMANAME^].[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''SYSTEM_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''FULL'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseBackup',
          'FULL'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01, OutputFileNamePart02)
   SELECT 'DatabaseBackup - USER_DATABASES - DIFF',
-         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''DIFF'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE [^CUSTOMSCHEMANAME^].[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''DIFF'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
           @DatabaseName,
          'DatabaseBackup',
          'DIFF'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01, OutputFileNamePart02)
   SELECT 'DatabaseBackup - USER_DATABASES - FULL',
-         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''FULL'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE [^CUSTOMSCHEMANAME^].[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''FULL'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseBackup',
          'FULL'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01, OutputFileNamePart02)
   SELECT 'DatabaseBackup - USER_DATABASES - LOG',
-         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''LOG'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE [^CUSTOMSCHEMANAME^].[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''LOG'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseBackup',
          'LOG'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01)
   SELECT 'DatabaseIntegrityCheck - SYSTEM_DATABASES',
-         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck]' + CHAR(13) + CHAR(10) + '@Databases = ''SYSTEM_DATABASES'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE [^CUSTOMSCHEMANAME^].[DatabaseIntegrityCheck]' + CHAR(13) + CHAR(10) + '@Databases = ''SYSTEM_DATABASES'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseIntegrityCheck'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01)
   SELECT 'DatabaseIntegrityCheck - USER_DATABASES',
-         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES' + CASE WHEN @AmazonRDS = 1 THEN ', -rdsadmin' ELSE '' END + ''',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE [^CUSTOMSCHEMANAME^].[DatabaseIntegrityCheck]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES' + CASE WHEN @AmazonRDS = 1 THEN ', -rdsadmin' ELSE '' END + ''',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseIntegrityCheck'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01)
   SELECT 'IndexOptimize - USER_DATABASES',
-         'EXECUTE ^CUSTOMSCHEMANAME^.[IndexOptimize]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE [^CUSTOMSCHEMANAME^].[IndexOptimize]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'IndexOptimize'
 
@@ -8980,7 +8980,7 @@ BEGIN
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01)
   SELECT 'CommandLog Cleanup',
-         'DELETE FROM ^CUSTOMSCHEMANAME^.[CommandLog]' + CHAR(13) + CHAR(10) + 'WHERE StartTime < DATEADD(dd,-30,GETDATE())',
+         'DELETE FROM [^CUSTOMSCHEMANAME^].[CommandLog]' + CHAR(13) + CHAR(10) + 'WHERE StartTime < DATEADD(dd,-30,GETDATE())',
          @DatabaseName,
          'CommandLogCleanup'
 
@@ -9100,4 +9100,3 @@ BEGIN
 
 END
 GO
-
