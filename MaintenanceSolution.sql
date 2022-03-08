@@ -43,6 +43,20 @@ BEGIN
   RAISERROR(@ErrorMessage,16,1) WITH NOWAIT
 END
 
+DECLARE @customschemaname VARCHAR(128) = '^CUSTOMSCHEMANAME^'
+IF @customschemaname LIKE '^CUSTOMSCH%' AND @customschemaname LIKE '%EMANAME^'
+BEGIN
+  SET @ErrorMessage = 'You must update with the name of an existing schema to own all objects created.'
+  RAISERROR(@ErrorMessage,16,1) WITH NOWAIT
+END
+IF NOT EXISTS (select 1 from sys.schemas xsch where xsch.name = @customschemaname)
+BEGIN
+  SET @ErrorMessage = 'Schema with name of ' + @customschemaname + ' does not exist. You must create this schema in advance.'
+  RAISERROR(@ErrorMessage,16,1) WITH NOWAIT
+END
+
+
+
 IF OBJECT_ID('tempdb..#Config') IS NOT NULL DROP TABLE #Config
 
 CREATE TABLE #Config ([Name] nvarchar(max),
