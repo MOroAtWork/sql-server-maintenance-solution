@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 SQL Server Maintenance Solution - SQL Server 2008, SQL Server 2008 R2, SQL Server 2012, SQL Server 2014, SQL Server 2016, SQL Server 2017, and SQL Server 2019
 
@@ -19,7 +19,7 @@ https://ola.hallengren.com
 
 */
 
-USE [master] -- Specify the database in which the objects will be created.
+USE [] -- Specify the database in which the objects will be created.
 
 SET NOCOUNT ON
 
@@ -59,9 +59,9 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CommandLog]') AND type in (N'U'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[CommandLog]') AND type in (N'U'))
 BEGIN
-CREATE TABLE [dbo].[CommandLog](
+CREATE TABLE ^CUSTOMSCHEMANAME^.[CommandLog](
   [ID] [int] IDENTITY(1,1) NOT NULL,
   [DatabaseName] [sysname] NULL,
   [SchemaName] [sysname] NULL,
@@ -89,12 +89,12 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CommandExecute]') AND type in (N'P', N'PC'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[CommandExecute]') AND type in (N'P', N'PC'))
 BEGIN
-EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[CommandExecute] AS'
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE ^CUSTOMSCHEMANAME^.[CommandExecute] AS'
 END
 GO
-ALTER PROCEDURE [dbo].[CommandExecute]
+ALTER PROCEDURE ^CUSTOMSCHEMANAME^.[CommandExecute]
 
 @DatabaseContext nvarchar(max),
 @Command nvarchar(max),
@@ -179,7 +179,7 @@ BEGIN
     SELECT 'QUOTED_IDENTIFIER has to be set to ON for the stored procedure.', 16, 1
   END
 
-  IF @LogToTable = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandLog')
+  IF @LogToTable = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandLog')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table CommandLog is missing. Download https://ola.hallengren.com/scripts/CommandLog.sql.', 16, 1
@@ -299,7 +299,7 @@ BEGIN
 
   IF @LogToTable = 'Y'
   BEGIN
-    INSERT INTO dbo.CommandLog (DatabaseName, SchemaName, ObjectName, ObjectType, IndexName, IndexType, StatisticsName, PartitionNumber, ExtendedInfo, CommandType, Command, StartTime)
+    INSERT INTO ^CUSTOMSCHEMANAME^.CommandLog (DatabaseName, SchemaName, ObjectName, ObjectType, IndexName, IndexType, StatisticsName, PartitionNumber, ExtendedInfo, CommandType, Command, StartTime)
     VALUES (@DatabaseName, @SchemaName, @ObjectName, @ObjectType, @IndexName, @IndexType, @StatisticsName, @PartitionNumber, @ExtendedInfo, @CommandType, @Command, @StartTime)
   END
 
@@ -360,7 +360,7 @@ BEGIN
 
   IF @LogToTable = 'Y'
   BEGIN
-    UPDATE dbo.CommandLog
+    UPDATE ^CUSTOMSCHEMANAME^.CommandLog
     SET EndTime = @EndTime,
         ErrorNumber = CASE WHEN @Execute = 'N' THEN NULL ELSE @Error END,
         ErrorMessage = @ErrorMessageOriginal
@@ -381,12 +381,12 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[DatabaseBackup]') AND type in (N'P', N'PC'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[DatabaseBackup]') AND type in (N'P', N'PC'))
 BEGIN
-EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[DatabaseBackup] AS'
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE ^CUSTOMSCHEMANAME^.[DatabaseBackup] AS'
 END
 GO
-ALTER PROCEDURE [dbo].[DatabaseBackup]
+ALTER PROCEDURE ^CUSTOMSCHEMANAME^.[DatabaseBackup]
 
 @Databases nvarchar(max) = NULL,
 @Directory nvarchar(max) = NULL,
@@ -765,31 +765,31 @@ BEGIN
     SELECT 'QUOTED_IDENTIFIER has to be set to ON for the stored procedure.', 16, 1
   END
 
-  IF NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandExecute')
+  IF NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandExecute')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The stored procedure CommandExecute is missing. Download https://ola.hallengren.com/scripts/CommandExecute.sql.', 16, 1
   END
 
-  IF EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandExecute' AND OBJECT_DEFINITION(objects.[object_id]) NOT LIKE '%@DatabaseContext%')
+  IF EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandExecute' AND OBJECT_DEFINITION(objects.[object_id]) NOT LIKE '%@DatabaseContext%')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The stored procedure CommandExecute needs to be updated. Download https://ola.hallengren.com/scripts/CommandExecute.sql.', 16, 1
   END
 
-  IF @LogToTable = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandLog')
+  IF @LogToTable = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandLog')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table CommandLog is missing. Download https://ola.hallengren.com/scripts/CommandLog.sql.', 16, 1
   END
 
-  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'Queue')
+  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'Queue')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table Queue is missing. Download https://ola.hallengren.com/scripts/Queue.sql.', 16, 1
   END
 
-  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'QueueDatabase')
+  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'QueueDatabase')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table QueueDatabase is missing. Download https://ola.hallengren.com/scripts/QueueDatabase.sql.', 16, 1
@@ -2792,7 +2792,7 @@ BEGIN
     BEGIN TRY
 
       SELECT @QueueID = QueueID
-      FROM dbo.[Queue]
+      FROM ^CUSTOMSCHEMANAME^.[Queue]
       WHERE SchemaName = @SchemaName
       AND ObjectName = @ObjectName
       AND [Parameters] = @Parameters
@@ -2802,14 +2802,14 @@ BEGIN
         BEGIN TRANSACTION
 
         SELECT @QueueID = QueueID
-        FROM dbo.[Queue] WITH (UPDLOCK, HOLDLOCK)
+        FROM ^CUSTOMSCHEMANAME^.[Queue] WITH (UPDLOCK, HOLDLOCK)
         WHERE SchemaName = @SchemaName
         AND ObjectName = @ObjectName
         AND [Parameters] = @Parameters
 
         IF @QueueID IS NULL
         BEGIN
-          INSERT INTO dbo.[Queue] (SchemaName, ObjectName, [Parameters])
+          INSERT INTO ^CUSTOMSCHEMANAME^.[Queue] (SchemaName, ObjectName, [Parameters])
           SELECT @SchemaName, @ObjectName, @Parameters
 
           SET @QueueID = SCOPE_IDENTITY()
@@ -2825,7 +2825,7 @@ BEGIN
           SessionID = @@SPID,
           RequestID = (SELECT request_id FROM sys.dm_exec_requests WHERE session_id = @@SPID),
           RequestStartTime = (SELECT start_time FROM sys.dm_exec_requests WHERE session_id = @@SPID)
-      FROM dbo.[Queue] [Queue]
+      FROM ^CUSTOMSCHEMANAME^.[Queue] [Queue]
       WHERE QueueID = @QueueID
       AND NOT EXISTS (SELECT *
                       FROM sys.dm_exec_requests
@@ -2833,27 +2833,27 @@ BEGIN
                       AND request_id = [Queue].RequestID
                       AND start_time = [Queue].RequestStartTime)
       AND NOT EXISTS (SELECT *
-                      FROM dbo.QueueDatabase QueueDatabase
+                      FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
                       INNER JOIN sys.dm_exec_requests ON QueueDatabase.SessionID = session_id AND QueueDatabase.RequestID = request_id AND QueueDatabase.RequestStartTime = start_time
                       WHERE QueueDatabase.QueueID = @QueueID)
 
       IF @@ROWCOUNT = 1
       BEGIN
-        INSERT INTO dbo.QueueDatabase (QueueID, DatabaseName)
+        INSERT INTO ^CUSTOMSCHEMANAME^.QueueDatabase (QueueID, DatabaseName)
         SELECT @QueueID AS QueueID,
                DatabaseName
         FROM @tmpDatabases tmpDatabases
         WHERE Selected = 1
-        AND NOT EXISTS (SELECT * FROM dbo.QueueDatabase WHERE DatabaseName = tmpDatabases.DatabaseName AND QueueID = @QueueID)
+        AND NOT EXISTS (SELECT * FROM ^CUSTOMSCHEMANAME^.QueueDatabase WHERE DatabaseName = tmpDatabases.DatabaseName AND QueueID = @QueueID)
 
         DELETE QueueDatabase
-        FROM dbo.QueueDatabase QueueDatabase
+        FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
         WHERE QueueID = @QueueID
         AND NOT EXISTS (SELECT * FROM @tmpDatabases tmpDatabases WHERE DatabaseName = QueueDatabase.DatabaseName AND Selected = 1)
 
         UPDATE QueueDatabase
         SET DatabaseOrder = tmpDatabases.[Order]
-        FROM dbo.QueueDatabase QueueDatabase
+        FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
         INNER JOIN @tmpDatabases tmpDatabases ON QueueDatabase.DatabaseName = tmpDatabases.DatabaseName
         WHERE QueueID = @QueueID
       END
@@ -2861,7 +2861,7 @@ BEGIN
       COMMIT TRANSACTION
 
       SELECT @QueueStartTime = QueueStartTime
-      FROM dbo.[Queue]
+      FROM ^CUSTOMSCHEMANAME^.[Queue]
       WHERE QueueID = @QueueID
 
     END TRY
@@ -2894,7 +2894,7 @@ BEGIN
           SessionID = NULL,
           RequestID = NULL,
           RequestStartTime = NULL
-      FROM dbo.QueueDatabase QueueDatabase
+      FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
       WHERE QueueID = @QueueID
       AND DatabaseStartTime IS NOT NULL
       AND DatabaseEndTime IS NULL
@@ -2914,7 +2914,7 @@ BEGIN
                          RequestID,
                          RequestStartTime,
                          DatabaseName
-            FROM dbo.QueueDatabase
+            FROM ^CUSTOMSCHEMANAME^.QueueDatabase
             WHERE QueueID = @QueueID
             AND (DatabaseStartTime < @QueueStartTime OR DatabaseStartTime IS NULL)
             AND NOT (DatabaseStartTime IS NOT NULL AND DatabaseEndTime IS NULL)
@@ -3735,7 +3735,7 @@ BEGIN
 
           SET @CurrentCommand = 'DECLARE @ReturnCode int EXECUTE @ReturnCode = dbo.xp_create_subdir N''' + REPLACE(@CurrentDirectoryPath,'''','''''') + ''' IF @ReturnCode <> 0 RAISERROR(''Error creating directory.'', 16, 1)'
 
-          EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
+          EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
           SET @Error = @@ERROR
           IF @Error <> 0 SET @CurrentCommandOutput = @Error
           IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -3844,7 +3844,7 @@ BEGIN
             SET @CurrentCommand = 'DECLARE @ReturnCode int EXECUTE @ReturnCode = dbo.xp_ss_delete @filename = N''' + REPLACE(@CurrentDirectoryPath,'''','''''') + '\*.' + @CurrentFileExtension + ''', @age = ''' + CAST(DATEDIFF(mi,@CurrentCleanupDate,SYSDATETIME()) + 1 AS nvarchar) + 'Minutes'' IF @ReturnCode <> 0 RAISERROR(''Error deleting SQLsafe backup files.'', 16, 1)'
           END
 
-          EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
+          EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
           SET @Error = @@ERROR
           IF @Error <> 0 SET @CurrentCommandOutput = @Error
           IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -4126,7 +4126,7 @@ BEGIN
           SET @CurrentCommand += ' IF @ReturnCode <> 0 RAISERROR(''Error performing Data Domain Boost backup.'', 16, 1)'
         END
 
-        EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
+        EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
         SET @Error = @@ERROR
         IF @Error <> 0 SET @CurrentCommandOutput = @Error
         IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -4227,7 +4227,7 @@ BEGIN
             SET @CurrentCommand += ' IF @ReturnCode <> 0 RAISERROR(''Error verifying SQLsafe backup.'', 16, 1)'
           END
 
-          EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
+          EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
           SET @Error = @@ERROR
           IF @Error <> 0 SET @CurrentCommandOutput = @Error
           IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -4337,7 +4337,7 @@ BEGIN
             SET @CurrentCommand = 'DECLARE @ReturnCode int EXECUTE @ReturnCode = dbo.xp_ss_delete @filename = N''' + REPLACE(@CurrentDirectoryPath,'''','''''') + '\*.' + @CurrentFileExtension + ''', @age = ''' + CAST(DATEDIFF(mi,@CurrentCleanupDate,SYSDATETIME()) + 1 AS nvarchar) + 'Minutes'' IF @ReturnCode <> 0 RAISERROR(''Error deleting SQLsafe backup files.'', 16, 1)'
           END
 
-          EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
+          EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
           SET @Error = @@ERROR
           IF @Error <> 0 SET @CurrentCommandOutput = @Error
           IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -4370,7 +4370,7 @@ BEGIN
     -- Update that the database is completed
     IF @DatabasesInParallel = 'Y'
     BEGIN
-      UPDATE dbo.QueueDatabase
+      UPDATE ^CUSTOMSCHEMANAME^.QueueDatabase
       SET DatabaseEndTime = SYSDATETIME()
       WHERE QueueID = @QueueID
       AND DatabaseName = @CurrentDatabaseName
@@ -4465,12 +4465,12 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[DatabaseIntegrityCheck]') AND type in (N'P', N'PC'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck]') AND type in (N'P', N'PC'))
 BEGIN
-EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[DatabaseIntegrityCheck] AS'
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE ^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck] AS'
 END
 GO
-ALTER PROCEDURE [dbo].[DatabaseIntegrityCheck]
+ALTER PROCEDURE ^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck]
 
 @Databases nvarchar(max) = NULL,
 @CheckCommands nvarchar(max) = 'CHECKDB',
@@ -4734,31 +4734,31 @@ BEGIN
     SELECT 'QUOTED_IDENTIFIER has to be set to ON for the stored procedure.', 16, 1
   END
 
-  IF NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandExecute')
+  IF NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandExecute')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The stored procedure CommandExecute is missing. Download https://ola.hallengren.com/scripts/CommandExecute.sql.', 16, 1
   END
 
-  IF EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandExecute' AND OBJECT_DEFINITION(objects.[object_id]) NOT LIKE '%@DatabaseContext%')
+  IF EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandExecute' AND OBJECT_DEFINITION(objects.[object_id]) NOT LIKE '%@DatabaseContext%')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The stored procedure CommandExecute needs to be updated. Download https://ola.hallengren.com/scripts/CommandExecute.sql.', 16, 1
   END
 
-  IF @LogToTable = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandLog')
+  IF @LogToTable = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandLog')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table CommandLog is missing. Download https://ola.hallengren.com/scripts/CommandLog.sql.', 16, 1
   END
 
-  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'Queue')
+  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'Queue')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table Queue is missing. Download https://ola.hallengren.com/scripts/Queue.sql.', 16, 1
   END
 
-  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'QueueDatabase')
+  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'QueueDatabase')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table QueueDatabase is missing. Download https://ola.hallengren.com/scripts/QueueDatabase.sql.', 16, 1
@@ -5526,7 +5526,7 @@ BEGIN
     SET LastCommandTime = MaxStartTime
     FROM @tmpDatabases tmpDatabases
     INNER JOIN (SELECT DatabaseName, MAX(StartTime) AS MaxStartTime
-                FROM dbo.CommandLog
+                FROM ^CUSTOMSCHEMANAME^.CommandLog
                 WHERE CommandType = 'DBCC_CHECKDB'
                 AND ErrorNumber = 0
                 GROUP BY DatabaseName) CommandLog
@@ -5642,7 +5642,7 @@ BEGIN
     BEGIN TRY
 
       SELECT @QueueID = QueueID
-      FROM dbo.[Queue]
+      FROM ^CUSTOMSCHEMANAME^.[Queue]
       WHERE SchemaName = @SchemaName
       AND ObjectName = @ObjectName
       AND [Parameters] = @Parameters
@@ -5652,14 +5652,14 @@ BEGIN
         BEGIN TRANSACTION
 
         SELECT @QueueID = QueueID
-        FROM dbo.[Queue] WITH (UPDLOCK, HOLDLOCK)
+        FROM ^CUSTOMSCHEMANAME^.[Queue] WITH (UPDLOCK, HOLDLOCK)
         WHERE SchemaName = @SchemaName
         AND ObjectName = @ObjectName
         AND [Parameters] = @Parameters
 
         IF @QueueID IS NULL
         BEGIN
-          INSERT INTO dbo.[Queue] (SchemaName, ObjectName, [Parameters])
+          INSERT INTO ^CUSTOMSCHEMANAME^.[Queue] (SchemaName, ObjectName, [Parameters])
           SELECT @SchemaName, @ObjectName, @Parameters
 
           SET @QueueID = SCOPE_IDENTITY()
@@ -5675,7 +5675,7 @@ BEGIN
           SessionID = @@SPID,
           RequestID = (SELECT request_id FROM sys.dm_exec_requests WHERE session_id = @@SPID),
           RequestStartTime = (SELECT start_time FROM sys.dm_exec_requests WHERE session_id = @@SPID)
-      FROM dbo.[Queue] [Queue]
+      FROM ^CUSTOMSCHEMANAME^.[Queue] [Queue]
       WHERE QueueID = @QueueID
       AND NOT EXISTS (SELECT *
                       FROM sys.dm_exec_requests
@@ -5683,27 +5683,27 @@ BEGIN
                       AND request_id = [Queue].RequestID
                       AND start_time = [Queue].RequestStartTime)
       AND NOT EXISTS (SELECT *
-                      FROM dbo.QueueDatabase QueueDatabase
+                      FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
                       INNER JOIN sys.dm_exec_requests ON QueueDatabase.SessionID = session_id AND QueueDatabase.RequestID = request_id AND QueueDatabase.RequestStartTime = start_time
                       WHERE QueueDatabase.QueueID = @QueueID)
 
       IF @@ROWCOUNT = 1
       BEGIN
-        INSERT INTO dbo.QueueDatabase (QueueID, DatabaseName)
+        INSERT INTO ^CUSTOMSCHEMANAME^.QueueDatabase (QueueID, DatabaseName)
         SELECT @QueueID AS QueueID,
                DatabaseName
         FROM @tmpDatabases tmpDatabases
         WHERE Selected = 1
-        AND NOT EXISTS (SELECT * FROM dbo.QueueDatabase WHERE DatabaseName = tmpDatabases.DatabaseName AND QueueID = @QueueID)
+        AND NOT EXISTS (SELECT * FROM ^CUSTOMSCHEMANAME^.QueueDatabase WHERE DatabaseName = tmpDatabases.DatabaseName AND QueueID = @QueueID)
 
         DELETE QueueDatabase
-        FROM dbo.QueueDatabase QueueDatabase
+        FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
         WHERE QueueID = @QueueID
         AND NOT EXISTS (SELECT * FROM @tmpDatabases tmpDatabases WHERE DatabaseName = QueueDatabase.DatabaseName AND Selected = 1)
 
         UPDATE QueueDatabase
         SET DatabaseOrder = tmpDatabases.[Order]
-        FROM dbo.QueueDatabase QueueDatabase
+        FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
         INNER JOIN @tmpDatabases tmpDatabases ON QueueDatabase.DatabaseName = tmpDatabases.DatabaseName
         WHERE QueueID = @QueueID
       END
@@ -5711,7 +5711,7 @@ BEGIN
       COMMIT TRANSACTION
 
       SELECT @QueueStartTime = QueueStartTime
-      FROM dbo.[Queue]
+      FROM ^CUSTOMSCHEMANAME^.[Queue]
       WHERE QueueID = @QueueID
 
     END TRY
@@ -5744,7 +5744,7 @@ BEGIN
           SessionID = NULL,
           RequestID = NULL,
           RequestStartTime = NULL
-      FROM dbo.QueueDatabase QueueDatabase
+      FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
       WHERE QueueID = @QueueID
       AND DatabaseStartTime IS NOT NULL
       AND DatabaseEndTime IS NULL
@@ -5763,7 +5763,7 @@ BEGIN
                          RequestID,
                          RequestStartTime,
                          DatabaseName
-            FROM dbo.QueueDatabase
+            FROM ^CUSTOMSCHEMANAME^.QueueDatabase
             WHERE QueueID = @QueueID
             AND (DatabaseStartTime < @QueueStartTime OR DatabaseStartTime IS NULL)
             AND NOT (DatabaseStartTime IS NOT NULL AND DatabaseEndTime IS NULL)
@@ -5930,7 +5930,7 @@ BEGIN
         IF @TabLock = 'Y' SET @CurrentCommand += ', TABLOCK'
         IF @MaxDOP IS NOT NULL SET @CurrentCommand += ', MAXDOP = ' + CAST(@MaxDOP AS nvarchar)
 
-        EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
+        EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
         SET @Error = @@ERROR
         IF @Error <> 0 SET @CurrentCommandOutput = @Error
         IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -6056,7 +6056,7 @@ BEGIN
             IF @TabLock = 'Y' SET @CurrentCommand += ', TABLOCK'
             IF @MaxDOP IS NOT NULL SET @CurrentCommand += ', MAXDOP = ' + CAST(@MaxDOP AS nvarchar)
 
-            EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
+            EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
             SET @Error = @@ERROR
             IF @Error <> 0 SET @CurrentCommandOutput = @Error
             IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -6093,7 +6093,7 @@ BEGIN
         SET @CurrentCommand += ') WITH NO_INFOMSGS, ALL_ERRORMSGS'
         IF @TabLock = 'Y' SET @CurrentCommand += ', TABLOCK'
 
-        EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
+        EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
         SET @Error = @@ERROR
         IF @Error <> 0 SET @CurrentCommandOutput = @Error
         IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -6225,7 +6225,7 @@ BEGIN
             IF @TabLock = 'Y' SET @CurrentCommand += ', TABLOCK'
             IF @MaxDOP IS NOT NULL SET @CurrentCommand += ', MAXDOP = ' + CAST(@MaxDOP AS nvarchar)
 
-            EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @SchemaName = @CurrentSchemaName, @ObjectName = @CurrentObjectName, @ObjectType = @CurrentObjectType, @LogToTable = @LogToTable, @Execute = @Execute
+            EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @SchemaName = @CurrentSchemaName, @ObjectName = @CurrentObjectName, @ObjectType = @CurrentObjectType, @LogToTable = @LogToTable, @Execute = @Execute
             SET @Error = @@ERROR
             IF @Error <> 0 SET @CurrentCommandOutput = @Error
             IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -6264,7 +6264,7 @@ BEGIN
         SET @CurrentCommand += 'DBCC CHECKCATALOG (' + QUOTENAME(@CurrentDatabaseName)
         SET @CurrentCommand += ') WITH NO_INFOMSGS'
 
-        EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
+        EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseContext, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 1, @DatabaseName = @CurrentDatabaseName, @LogToTable = @LogToTable, @Execute = @Execute
         SET @Error = @@ERROR
         IF @Error <> 0 SET @CurrentCommandOutput = @Error
         IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -6283,7 +6283,7 @@ BEGIN
     -- Update that the database is completed
     IF @DatabasesInParallel = 'Y'
     BEGIN
-      UPDATE dbo.QueueDatabase
+      UPDATE ^CUSTOMSCHEMANAME^.QueueDatabase
       SET DatabaseEndTime = SYSDATETIME()
       WHERE QueueID = @QueueID
       AND DatabaseName = @CurrentDatabaseName
@@ -6353,12 +6353,12 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[IndexOptimize]') AND type in (N'P', N'PC'))
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'^CUSTOMSCHEMANAME^.[IndexOptimize]') AND type in (N'P', N'PC'))
 BEGIN
-EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE [dbo].[IndexOptimize] AS'
+EXEC dbo.sp_executesql @statement = N'CREATE PROCEDURE ^CUSTOMSCHEMANAME^.[IndexOptimize] AS'
 END
 GO
-ALTER PROCEDURE [dbo].[IndexOptimize]
+ALTER PROCEDURE ^CUSTOMSCHEMANAME^.[IndexOptimize]
 
 @Databases nvarchar(max) = NULL,
 @FragmentationLow nvarchar(max) = NULL,
@@ -6715,31 +6715,31 @@ BEGIN
     SELECT 'QUOTED_IDENTIFIER has to be set to ON for the stored procedure.', 16, 1
   END
 
-  IF NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandExecute')
+  IF NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandExecute')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The stored procedure CommandExecute is missing. Download https://ola.hallengren.com/scripts/CommandExecute.sql.', 16, 1
   END
 
-  IF EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandExecute' AND OBJECT_DEFINITION(objects.[object_id]) NOT LIKE '%@DatabaseContext%')
+  IF EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'P' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandExecute' AND OBJECT_DEFINITION(objects.[object_id]) NOT LIKE '%@DatabaseContext%')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The stored procedure CommandExecute needs to be updated. Download https://ola.hallengren.com/scripts/CommandExecute.sql.', 16, 1
   END
 
-  IF @LogToTable = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'CommandLog')
+  IF @LogToTable = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'CommandLog')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table CommandLog is missing. Download https://ola.hallengren.com/scripts/CommandLog.sql.', 16, 1
   END
 
-  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'Queue')
+  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'Queue')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table Queue is missing. Download https://ola.hallengren.com/scripts/Queue.sql.', 16, 1
   END
 
-  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = 'dbo' AND objects.[name] = 'QueueDatabase')
+  IF @DatabasesInParallel = 'Y' AND NOT EXISTS (SELECT * FROM sys.objects objects INNER JOIN sys.schemas schemas ON objects.[schema_id] = schemas.[schema_id] WHERE objects.[type] = 'U' AND schemas.[name] = '^CUSTOMSCHEMANAME^' AND objects.[name] = 'QueueDatabase')
   BEGIN
     INSERT INTO @Errors ([Message], Severity, [State])
     SELECT 'The table QueueDatabase is missing. Download https://ola.hallengren.com/scripts/QueueDatabase.sql.', 16, 1
@@ -7636,7 +7636,7 @@ BEGIN
     BEGIN TRY
 
       SELECT @QueueID = QueueID
-      FROM dbo.[Queue]
+      FROM ^CUSTOMSCHEMANAME^.[Queue]
       WHERE SchemaName = @SchemaName
       AND ObjectName = @ObjectName
       AND [Parameters] = @Parameters
@@ -7646,14 +7646,14 @@ BEGIN
         BEGIN TRANSACTION
 
         SELECT @QueueID = QueueID
-        FROM dbo.[Queue] WITH (UPDLOCK, HOLDLOCK)
+        FROM ^CUSTOMSCHEMANAME^.[Queue] WITH (UPDLOCK, HOLDLOCK)
         WHERE SchemaName = @SchemaName
         AND ObjectName = @ObjectName
         AND [Parameters] = @Parameters
 
         IF @QueueID IS NULL
         BEGIN
-          INSERT INTO dbo.[Queue] (SchemaName, ObjectName, [Parameters])
+          INSERT INTO ^CUSTOMSCHEMANAME^.[Queue] (SchemaName, ObjectName, [Parameters])
           SELECT @SchemaName, @ObjectName, @Parameters
 
           SET @QueueID = SCOPE_IDENTITY()
@@ -7669,7 +7669,7 @@ BEGIN
           SessionID = @@SPID,
           RequestID = (SELECT request_id FROM sys.dm_exec_requests WHERE session_id = @@SPID),
           RequestStartTime = (SELECT start_time FROM sys.dm_exec_requests WHERE session_id = @@SPID)
-      FROM dbo.[Queue] [Queue]
+      FROM ^CUSTOMSCHEMANAME^.[Queue] [Queue]
       WHERE QueueID = @QueueID
       AND NOT EXISTS (SELECT *
                       FROM sys.dm_exec_requests
@@ -7677,27 +7677,27 @@ BEGIN
                       AND request_id = [Queue].RequestID
                       AND start_time = [Queue].RequestStartTime)
       AND NOT EXISTS (SELECT *
-                      FROM dbo.QueueDatabase QueueDatabase
+                      FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
                       INNER JOIN sys.dm_exec_requests ON QueueDatabase.SessionID = session_id AND QueueDatabase.RequestID = request_id AND QueueDatabase.RequestStartTime = start_time
                       WHERE QueueDatabase.QueueID = @QueueID)
 
       IF @@ROWCOUNT = 1
       BEGIN
-        INSERT INTO dbo.QueueDatabase (QueueID, DatabaseName)
+        INSERT INTO ^CUSTOMSCHEMANAME^.QueueDatabase (QueueID, DatabaseName)
         SELECT @QueueID AS QueueID,
                DatabaseName
         FROM @tmpDatabases tmpDatabases
         WHERE Selected = 1
-        AND NOT EXISTS (SELECT * FROM dbo.QueueDatabase WHERE DatabaseName = tmpDatabases.DatabaseName AND QueueID = @QueueID)
+        AND NOT EXISTS (SELECT * FROM ^CUSTOMSCHEMANAME^.QueueDatabase WHERE DatabaseName = tmpDatabases.DatabaseName AND QueueID = @QueueID)
 
         DELETE QueueDatabase
-        FROM dbo.QueueDatabase QueueDatabase
+        FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
         WHERE QueueID = @QueueID
         AND NOT EXISTS (SELECT * FROM @tmpDatabases tmpDatabases WHERE DatabaseName = QueueDatabase.DatabaseName AND Selected = 1)
 
         UPDATE QueueDatabase
         SET DatabaseOrder = tmpDatabases.[Order]
-        FROM dbo.QueueDatabase QueueDatabase
+        FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
         INNER JOIN @tmpDatabases tmpDatabases ON QueueDatabase.DatabaseName = tmpDatabases.DatabaseName
         WHERE QueueID = @QueueID
       END
@@ -7705,7 +7705,7 @@ BEGIN
       COMMIT TRANSACTION
 
       SELECT @QueueStartTime = QueueStartTime
-      FROM dbo.[Queue]
+      FROM ^CUSTOMSCHEMANAME^.[Queue]
       WHERE QueueID = @QueueID
 
     END TRY
@@ -7738,7 +7738,7 @@ BEGIN
           SessionID = NULL,
           RequestID = NULL,
           RequestStartTime = NULL
-      FROM dbo.QueueDatabase QueueDatabase
+      FROM ^CUSTOMSCHEMANAME^.QueueDatabase QueueDatabase
       WHERE QueueID = @QueueID
       AND DatabaseStartTime IS NOT NULL
       AND DatabaseEndTime IS NULL
@@ -7757,7 +7757,7 @@ BEGIN
                          RequestID,
                          RequestStartTime,
                          DatabaseName
-            FROM dbo.QueueDatabase
+            FROM ^CUSTOMSCHEMANAME^.QueueDatabase
             WHERE QueueID = @QueueID
             AND (DatabaseStartTime < @QueueStartTime OR DatabaseStartTime IS NULL)
             AND NOT (DatabaseStartTime IS NOT NULL AND DatabaseEndTime IS NULL)
@@ -8529,7 +8529,7 @@ BEGIN
 
           IF @CurrentAlterIndexWithClause IS NOT NULL SET @CurrentCommand += @CurrentAlterIndexWithClause
 
-          EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseName, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 2, @Comment = @CurrentComment, @DatabaseName = @CurrentDatabaseName, @SchemaName = @CurrentSchemaName, @ObjectName = @CurrentObjectName, @ObjectType = @CurrentObjectType, @IndexName = @CurrentIndexName, @IndexType = @CurrentIndexType, @PartitionNumber = @CurrentPartitionNumber, @ExtendedInfo = @CurrentExtendedInfo, @LockMessageSeverity = @LockMessageSeverity, @ExecuteAsUser = @ExecuteAsUser, @LogToTable = @LogToTable, @Execute = @Execute
+          EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseName, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 2, @Comment = @CurrentComment, @DatabaseName = @CurrentDatabaseName, @SchemaName = @CurrentSchemaName, @ObjectName = @CurrentObjectName, @ObjectType = @CurrentObjectType, @IndexName = @CurrentIndexName, @IndexType = @CurrentIndexType, @PartitionNumber = @CurrentPartitionNumber, @ExtendedInfo = @CurrentExtendedInfo, @LockMessageSeverity = @LockMessageSeverity, @ExecuteAsUser = @ExecuteAsUser, @LogToTable = @LogToTable, @Execute = @Execute
           SET @Error = @@ERROR
           IF @Error <> 0 SET @CurrentCommandOutput = @Error
           IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -8633,7 +8633,7 @@ BEGIN
 
           IF @PartitionLevelStatistics = 1 AND @CurrentIsIncremental = 1 AND @CurrentPartitionNumber IS NOT NULL SET @CurrentCommand += ' ON PARTITIONS(' + CAST(@CurrentPartitionNumber AS nvarchar(max)) + ')'
 
-          EXECUTE @CurrentCommandOutput = dbo.CommandExecute @DatabaseContext = @CurrentDatabaseName, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 2, @Comment = @CurrentComment, @DatabaseName = @CurrentDatabaseName, @SchemaName = @CurrentSchemaName, @ObjectName = @CurrentObjectName, @ObjectType = @CurrentObjectType, @IndexName = @CurrentIndexName, @IndexType = @CurrentIndexType, @StatisticsName = @CurrentStatisticsName, @ExtendedInfo = @CurrentExtendedInfo, @LockMessageSeverity = @LockMessageSeverity, @ExecuteAsUser = @ExecuteAsUser, @LogToTable = @LogToTable, @Execute = @Execute
+          EXECUTE @CurrentCommandOutput = ^CUSTOMSCHEMANAME^.CommandExecute @DatabaseContext = @CurrentDatabaseName, @Command = @CurrentCommand, @CommandType = @CurrentCommandType, @Mode = 2, @Comment = @CurrentComment, @DatabaseName = @CurrentDatabaseName, @SchemaName = @CurrentSchemaName, @ObjectName = @CurrentObjectName, @ObjectType = @CurrentObjectType, @IndexName = @CurrentIndexName, @IndexType = @CurrentIndexType, @StatisticsName = @CurrentStatisticsName, @ExtendedInfo = @CurrentExtendedInfo, @LockMessageSeverity = @LockMessageSeverity, @ExecuteAsUser = @ExecuteAsUser, @LogToTable = @LogToTable, @Execute = @Execute
           SET @Error = @@ERROR
           IF @Error <> 0 SET @CurrentCommandOutput = @Error
           IF @CurrentCommandOutput <> 0 SET @ReturnCode = @CurrentCommandOutput
@@ -8724,7 +8724,7 @@ BEGIN
     -- Update that the database is completed
     IF @DatabasesInParallel = 'Y'
     BEGIN
-      UPDATE dbo.QueueDatabase
+      UPDATE ^CUSTOMSCHEMANAME^.QueueDatabase
       SET DatabaseEndTime = SYSDATETIME()
       WHERE QueueID = @QueueID
       AND DatabaseName = @CurrentDatabaseName
@@ -8922,47 +8922,47 @@ BEGIN
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01, OutputFileNamePart02)
   SELECT 'DatabaseBackup - SYSTEM_DATABASES - FULL',
-         'EXECUTE [dbo].[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''SYSTEM_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''FULL'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''SYSTEM_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''FULL'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseBackup',
          'FULL'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01, OutputFileNamePart02)
   SELECT 'DatabaseBackup - USER_DATABASES - DIFF',
-         'EXECUTE [dbo].[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''DIFF'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''DIFF'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
           @DatabaseName,
          'DatabaseBackup',
          'DIFF'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01, OutputFileNamePart02)
   SELECT 'DatabaseBackup - USER_DATABASES - FULL',
-         'EXECUTE [dbo].[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''FULL'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''FULL'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseBackup',
          'FULL'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01, OutputFileNamePart02)
   SELECT 'DatabaseBackup - USER_DATABASES - LOG',
-         'EXECUTE [dbo].[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''LOG'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseBackup]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@Directory = ' + ISNULL('N''' + REPLACE(@BackupDirectory,'''','''''') + '''','NULL') + ',' + CHAR(13) + CHAR(10) + '@BackupType = ''LOG'',' + CHAR(13) + CHAR(10) + '@Verify = ''Y'',' + CHAR(13) + CHAR(10) + '@CleanupTime = ' + ISNULL(CAST(@CleanupTime AS nvarchar),'NULL') + ',' + CHAR(13) + CHAR(10) + '@CheckSum = ''Y'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseBackup',
          'LOG'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01)
   SELECT 'DatabaseIntegrityCheck - SYSTEM_DATABASES',
-         'EXECUTE [dbo].[DatabaseIntegrityCheck]' + CHAR(13) + CHAR(10) + '@Databases = ''SYSTEM_DATABASES'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck]' + CHAR(13) + CHAR(10) + '@Databases = ''SYSTEM_DATABASES'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseIntegrityCheck'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01)
   SELECT 'DatabaseIntegrityCheck - USER_DATABASES',
-         'EXECUTE [dbo].[DatabaseIntegrityCheck]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES' + CASE WHEN @AmazonRDS = 1 THEN ', -rdsadmin' ELSE '' END + ''',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE ^CUSTOMSCHEMANAME^.[DatabaseIntegrityCheck]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES' + CASE WHEN @AmazonRDS = 1 THEN ', -rdsadmin' ELSE '' END + ''',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'DatabaseIntegrityCheck'
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01)
   SELECT 'IndexOptimize - USER_DATABASES',
-         'EXECUTE [dbo].[IndexOptimize]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
+         'EXECUTE ^CUSTOMSCHEMANAME^.[IndexOptimize]' + CHAR(13) + CHAR(10) + '@Databases = ''USER_DATABASES'',' + CHAR(13) + CHAR(10) + '@LogToTable = ''' + @LogToTable + '''',
          @DatabaseName,
          'IndexOptimize'
 
@@ -8980,7 +8980,7 @@ BEGIN
 
   INSERT INTO @Jobs ([Name], CommandTSQL, DatabaseName, OutputFileNamePart01)
   SELECT 'CommandLog Cleanup',
-         'DELETE FROM [dbo].[CommandLog]' + CHAR(13) + CHAR(10) + 'WHERE StartTime < DATEADD(dd,-30,GETDATE())',
+         'DELETE FROM ^CUSTOMSCHEMANAME^.[CommandLog]' + CHAR(13) + CHAR(10) + 'WHERE StartTime < DATEADD(dd,-30,GETDATE())',
          @DatabaseName,
          'CommandLogCleanup'
 
